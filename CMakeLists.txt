@@ -19,6 +19,7 @@ add_compile_options(
 add_library(isp_core STATIC
     src/image.cpp
     src/io.cpp
+    src/modules/blc.cpp
 )
 
 target_include_directories(isp_core 
