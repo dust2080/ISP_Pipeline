@@ -72,4 +72,40 @@ bool save_ppm(const std::string& path, const Image& img) {
     return true;
 }
 
+bool save_ppm(const std::string& path, const RgbImage& img) {
+    std::ofstream file(path, std::ios::binary);
+    if (!file) {
+        std::cerr << "Failed to create: " << path << '\n';
+        return false;
+    }
+
+    const int w = img.width();
+    const int h = img.height();
+    const uint16_t max_val = img.max_value();
+    const auto& data = img.data();
+
+    // PPM header (P6 = RGB binary)
+    file << "P6\n" << w << " " << h << "\n" << max_val << "\n";
+
+    if (max_val > 255) {
+        // 16-bit: PPM uses big-endian
+        for (const auto& p : data) {
+            file.put(static_cast<char>(p.r >> 8));
+            file.put(static_cast<char>(p.r & 0xFF));
+            file.put(static_cast<char>(p.g >> 8));
+            file.put(static_cast<char>(p.g & 0xFF));
+            file.put(static_cast<char>(p.b >> 8));
+            file.put(static_cast<char>(p.b & 0xFF));
+        }
+    } else {
+        for (const auto& p : data) {
+            file.put(static_cast<char>(p.r));
+            file.put(static_cast<char>(p.g));
+            file.put(static_cast<char>(p.b));
+        }
+    }
+
+    return true;
+}
+
 } // namespace isp
