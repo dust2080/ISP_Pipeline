@@ -35,3 +35,6 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+# Test RAW generator tool
+add_executable(generate_test_raw tools/generate_test_raw.cpp)
