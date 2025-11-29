@@ -23,6 +23,7 @@ add_library(isp_core STATIC
     src/modules/blc.cpp
     src/modules/demosaic.cpp
     src/modules/awb.cpp
+    src/modules/gamma.cpp
 )
 
 target_include_directories(isp_core 
