@@ -22,6 +22,7 @@ add_library(isp_core STATIC
     src/rgb_image.cpp
     src/modules/blc.cpp
     src/modules/demosaic.cpp
+    src/modules/awb.cpp
 )
 
 target_include_directories(isp_core 
