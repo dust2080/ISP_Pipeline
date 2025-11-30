@@ -11,8 +11,6 @@ This project simulates the core image processing steps that happen inside a came
 RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 ```
 
-![Pipeline Flow](docs/pipeline.png)
-
 ## Modules
 
 | Module | Description | Algorithm |
@@ -25,14 +23,8 @@ RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 
 ## Results
 
-### Test Pattern
-| Input (Simulated RAW) | Output (After ISP) |
-|----------------------|-------------------|
-| ![input](docs/test_input.png) | ![output](docs/test_output.png) |
-
-### Real Image
-| Input | Output |
-|-------|--------|
+| Input | Output (After ISP) |
+|-------|-------------------|
 | ![input](docs/real_input.png) | ![output](docs/real_output.png) |
 
 ## Project Structure
@@ -63,8 +55,6 @@ ISP_Pipeline/
 │       └── sharpen.cpp
 ├── tools/
 │   └── generate_test_raw.cpp
-├── data/
-│   └── (test images)
 └── vendor/
     ├── stb_image.h
     └── stb_image_write.h
@@ -122,7 +112,3 @@ Computing `pow()` for every pixel is expensive. A Lookup Table (LUT) pre-compute
 ## License
 
 MIT License
-
-## Author
-
-[Jef Chang]
