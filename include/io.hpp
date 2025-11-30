@@ -24,6 +24,8 @@ bool save_ppm(const std::string& path, const Image& img);
 // RGB output
 bool save_ppm(const std::string& path, const RgbImage& img);
 
+bool save_png(const std::string& path, const RgbImage& img);
+
 } // namespace isp
 
 #endif

@@ -1,3 +1,5 @@
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../vendor/stb_image_write.h"
 #include "io.hpp"
 #include <fstream>
 #include <iostream>
@@ -106,6 +108,26 @@ bool save_ppm(const std::string& path, const RgbImage& img) {
     }
 
     return true;
+}
+
+bool save_png(const std::string& path, const RgbImage& img) {
+    const int w = img.width();
+    const int h = img.height();
+    const auto& data = img.data();
+    const uint16_t max_val = img.max_value();
+
+    // PNG 只支援 8-bit，需要轉換
+    std::vector<uint8_t> buffer(static_cast<std::size_t>(w * h * 3));
+
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        // 從原本的 bit depth 轉換到 8-bit
+        buffer[i * 3 + 0] = static_cast<uint8_t>(data[i].r * 255 / max_val);
+        buffer[i * 3 + 1] = static_cast<uint8_t>(data[i].g * 255 / max_val);
+        buffer[i * 3 + 2] = static_cast<uint8_t>(data[i].b * 255 / max_val);
+    }
+
+    int result = stbi_write_png(path.c_str(), w, h, 3, buffer.data(), w * 3);
+    return result != 0;
 }
 
 } // namespace isp

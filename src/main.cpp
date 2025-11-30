@@ -51,6 +51,9 @@ int main() {
     if (isp::save_ppm("data/output.ppm", rgb)) {
         std::cout << "Saved: data/output.ppm\n";
     }
+    if (isp::save_png("data/output.png", rgb)) {
+        std::cout << "Saved: data/output.png\n";
+    }
 
     std::cout << "Pipeline complete!\n";
     return 0;

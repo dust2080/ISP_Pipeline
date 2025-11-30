@@ -30,6 +30,7 @@ add_library(isp_core STATIC
 target_include_directories(isp_core 
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
 )
 
 add_executable(isp_main src/main.cpp)
