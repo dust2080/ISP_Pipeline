@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "../vendor/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../vendor/stb_image_write.h"
 #include "io.hpp"
@@ -40,6 +42,50 @@ std::optional<Image> load_raw(const std::string& path, const RawFileConfig& conf
     }
 
     return img;
+}
+
+std::optional<Image> load_png_as_raw(const std::string& path, BayerPattern pattern) {
+    int w, h, channels;
+    uint8_t* data = stbi_load(path.c_str(), &w, &h, &channels, 3); // Force RGB
+    if (!data) {
+        std::cerr << "Failed to load: " << path << '\n';
+        return std::nullopt;
+    }
+
+    Image raw(w, h, 12, pattern);
+    auto& raw_data = raw.data();
+
+    // Simulate Bayer pattern: keep only one channel per pixel
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            std::size_t src_idx = static_cast<std::size_t>((y * w + x) * 3);
+            std::size_t dst_idx = static_cast<std::size_t>(y * w + x);
+
+            uint8_t r = data[src_idx + 0];
+            uint8_t g = data[src_idx + 1];
+            uint8_t b = data[src_idx + 2];
+
+            bool even_row = (y % 2 == 0);
+            bool even_col = (x % 2 == 0);
+
+            uint8_t value;
+            if (pattern == BayerPattern::RGGB) {
+                if (even_row && even_col)       value = r;
+                else if (even_row && !even_col) value = g;
+                else if (!even_row && even_col) value = g;
+                else                            value = b;
+            } else {
+                // Fallback: only RGGB supported
+                value = g;
+            }
+
+            // Convert 8-bit to 12-bit
+            raw_data[dst_idx] = static_cast<uint16_t>(value) << 4;
+        }
+    }
+
+    stbi_image_free(data);
+    return raw;
 }
 
 bool save_ppm(const std::string& path, const Image& img) {

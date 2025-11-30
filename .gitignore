@@ -1,9 +1,20 @@
+cat > .gitignore << 'EOF'
+# Build
 build/
 cmake-build-*/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 .DS_Store
+
+# Output images (keep test.raw for demo)
+data/*.ppm
+data/*.png
+
+# Compiled
 *.o
 *.a
 *.dylib
+EOF

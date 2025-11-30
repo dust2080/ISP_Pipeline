@@ -7,54 +7,63 @@
 #include "modules/gamma.hpp"
 #include "modules/sharpen.hpp"
 #include <iostream>
+#include <optional>
 
-int main() {
-    // 1. Load RAW
-    isp::RawFileConfig config;
-    config.width = 640;
-    config.height = 480;
-    config.bit_depth = 12;
-    config.pattern = isp::BayerPattern::RGGB;
-    config.little_endian = true;
+int main(int argc, char* argv[]) {
+    std::string input_path = "data/test.raw";
+    bool use_png_input = false;
 
-    std::cout << "Loading RAW...\n";
-    auto result = isp::load_raw("data/test.raw", config);
+    if (argc > 1) {
+        input_path = argv[1];
+        if (input_path.size() > 4 && 
+            input_path.substr(input_path.size() - 4) == ".png") {
+            use_png_input = true;
+        }
+    }
+
+    std::optional<isp::Image> result;
+
+    if (use_png_input) {
+        std::cout << "Loading PNG as RAW: " << input_path << "\n";
+        result = isp::load_png_as_raw(input_path);
+    } else {
+        std::cout << "Loading RAW: " << input_path << "\n";
+        isp::RawFileConfig config;
+        config.width = 640;
+        config.height = 480;
+        config.bit_depth = 12;
+        config.pattern = isp::BayerPattern::RGGB;
+        config.little_endian = true;
+        result = isp::load_raw(input_path, config);
+    }
+
     if (!result) {
-        std::cerr << "Failed to load RAW\n";
+        std::cerr << "Failed to load image\n";
         return 1;
     }
-    isp::Image& raw = *result;
+
+    isp::Image raw = std::move(*result);
     std::cout << "Loaded: " << raw.width() << "x" << raw.height() << "\n";
 
-    // 2. BLC
     std::cout << "Applying BLC...\n";
     isp::apply_blc(raw, 64);
 
-    // 3. Demosaic
     std::cout << "Applying Demosaic...\n";
     isp::RgbImage rgb = isp::demosaic(raw);
 
-    // 4. AWB
     std::cout << "Applying AWB...\n";
     isp::apply_awb(rgb);
 
-    // 5. Gamma
     std::cout << "Applying Gamma...\n";
     isp::apply_gamma(rgb, 2.2);
 
-    // 6. Sharpen
     std::cout << "Applying Sharpen...\n";
     isp::apply_sharpen(rgb);
 
-    // 7. Save output
     std::cout << "Saving output...\n";
-    if (isp::save_ppm("data/output.ppm", rgb)) {
-        std::cout << "Saved: data/output.ppm\n";
-    }
-    if (isp::save_png("data/output.png", rgb)) {
-        std::cout << "Saved: data/output.png\n";
-    }
+    isp::save_ppm("data/output.ppm", rgb);
+    isp::save_png("data/output.png", rgb);
+    std::cout << "Saved: data/output.png\n";
 
-    std::cout << "Pipeline complete!\n";
     return 0;
 }

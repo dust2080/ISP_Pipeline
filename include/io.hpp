@@ -18,6 +18,8 @@ struct RawFileConfig {
 
 std::optional<Image> load_raw(const std::string& path, const RawFileConfig& config);
 
+std::optional<Image> load_png_as_raw(const std::string& path, BayerPattern pattern = BayerPattern::RGGB);
+
 // Grayscale output
 bool save_ppm(const std::string& path, const Image& img);
 
