@@ -30,7 +30,7 @@ RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 ## Performance Benchmark
 
 Test image: 1206 x 2144 (2.5 MP)  
-Platform: MacBook Air M1 / Intel i7 (填你的機器)
+Platform: MacBook Air M4
 
 | Module | Time | Percentage |
 |--------|------|------------|
