@@ -27,6 +27,33 @@ RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 |-------|-------------------|
 | ![input](docs/real_input.png) | ![output](docs/real_output.png) |
 
+## Performance Benchmark
+
+Test image: 1206 x 2144 (2.5 MP)  
+Platform: MacBook Air M1 / Intel i7 (填你的機器)
+
+| Module | Time | Percentage |
+|--------|------|------------|
+| BLC | 32 ms | 3% |
+| Demosaic | 466 ms | 50% |
+| AWB | 75 ms | 8% |
+| Gamma | 27 ms | 3% |
+| Sharpen | 332 ms | 36% |
+| **Total** | **932 ms** | 100% |
+
+### Analysis
+
+- **Demosaic** and **Sharpen** dominate the pipeline (86% of total time)
+- Both require neighbor pixel access, causing more cache misses
+- **Gamma** is fast due to LUT optimization
+
+### Potential Optimizations
+
+- Multi-threading with OpenMP (expected 3-4x speedup)
+- SIMD instructions (AVX2) for parallel pixel processing
+- Cache-friendly tiling to improve memory access patterns
+- Reduce memory copy in Sharpen module
+
 ## Project Structure
 ```
 ISP_Pipeline/
