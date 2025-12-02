@@ -41,6 +41,22 @@ Platform: MacBook Air M4
 | Sharpen | 332 ms | 36% |
 | **Total** | **932 ms** | 100% |
 
+## Memory Usage
+
+Test image: 1206 x 2144 (2.5 MP)
+
+| Data | Calculation | Size |
+|------|-------------|------|
+| RAW Image | 1206 × 2144 × 2 bytes | 5.2 MB |
+| RGB Image | 1206 × 2144 × 6 bytes | 15.5 MB |
+| Sharpen Copy | 1206 × 2144 × 6 bytes | 15.5 MB |
+| Gamma LUT | 4096 × 2 bytes | 8 KB |
+| **Peak Total** | | **~36 MB** |
+
+### Optimization Opportunity
+
+Sharpen currently copies the entire image. This can be optimized to keep only 3 rows (prev, curr, next), reducing memory from 15.5 MB to ~22 KB.
+
 ### Analysis
 
 - **Demosaic** and **Sharpen** dominate the pipeline (86% of total time)
