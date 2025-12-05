@@ -6,6 +6,7 @@
 #include "modules/awb.hpp"
 #include "modules/gamma.hpp"
 #include "modules/sharpen.hpp"
+#include "modules/denoise.hpp"
 #include <iostream>
 #include <optional>
 #include <chrono>
@@ -79,6 +80,13 @@ int main(int argc, char* argv[]) {
     end = Clock::now();
     auto gamma_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "Gamma:    " << gamma_time << " us\n";
+
+    // Denoise
+    start = Clock::now();
+    isp::apply_denoise(rgb);
+    end = Clock::now();
+    auto denoise_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Denoise:  " << denoise_time << " us\n";
 
     // Sharpen
     start = Clock::now();

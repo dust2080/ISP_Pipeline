@@ -43,6 +43,7 @@ add_library(isp_core STATIC
     src/modules/awb.cpp
     src/modules/gamma.cpp
     src/modules/sharpen.cpp
+    src/modules/denoise.cpp
 )
 
 target_include_directories(isp_core 
