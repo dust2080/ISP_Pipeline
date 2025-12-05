@@ -16,6 +16,24 @@ add_compile_options(
     -Wconversion
 )
 
+# OpenMP for macOS with Homebrew
+if(APPLE)
+    execute_process(
+        COMMAND brew --prefix libomp
+        OUTPUT_VARIABLE LIBOMP_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(LIBOMP_PREFIX)
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY "${LIBOMP_PREFIX}/lib/libomp.dylib")
+    endif()
+endif()
+
+find_package(OpenMP REQUIRED)
+
 add_library(isp_core STATIC
     src/image.cpp
     src/io.cpp
@@ -33,15 +51,15 @@ target_include_directories(isp_core
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor
 )
 
+target_link_libraries(isp_core PUBLIC OpenMP::OpenMP_CXX)
+
 add_executable(isp_main src/main.cpp)
 target_link_libraries(isp_main PRIVATE isp_core)
 
 option(BUILD_TESTS "Build unit tests" OFF)
-
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-# Test RAW generator tool
 add_executable(generate_test_raw tools/generate_test_raw.cpp)

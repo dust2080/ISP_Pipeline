@@ -8,6 +8,7 @@
 #include "modules/sharpen.hpp"
 #include <iostream>
 #include <optional>
+#include <chrono>
 
 int main(int argc, char* argv[]) {
     std::string input_path = "data/test.raw";
@@ -43,23 +44,55 @@ int main(int argc, char* argv[]) {
     }
 
     isp::Image raw = std::move(*result);
-    std::cout << "Loaded: " << raw.width() << "x" << raw.height() << "\n";
+    std::cout << "Loaded: " << raw.width() << "x" << raw.height() << "\n\n";
 
-    std::cout << "Applying BLC...\n";
+    // Benchmark helper
+    using Clock = std::chrono::high_resolution_clock;
+    auto total_start = Clock::now();
+
+    std::cout << "=== Pipeline Benchmark ===\n";
+
+    // BLC
+    auto start = Clock::now();
     isp::apply_blc(raw, 64);
+    auto end = Clock::now();
+    auto blc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "BLC:      " << blc_time << " us\n";
 
-    std::cout << "Applying Demosaic...\n";
+    // Demosaic
+    start = Clock::now();
     isp::RgbImage rgb = isp::demosaic(raw);
+    end = Clock::now();
+    auto demosaic_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Demosaic: " << demosaic_time << " us\n";
 
-    std::cout << "Applying AWB...\n";
+    // AWB
+    start = Clock::now();
     isp::apply_awb(rgb);
+    end = Clock::now();
+    auto awb_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "AWB:      " << awb_time << " us\n";
 
-    std::cout << "Applying Gamma...\n";
+    // Gamma
+    start = Clock::now();
     isp::apply_gamma(rgb, 2.2);
+    end = Clock::now();
+    auto gamma_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Gamma:    " << gamma_time << " us\n";
 
-    std::cout << "Applying Sharpen...\n";
+    // Sharpen
+    start = Clock::now();
     isp::apply_sharpen(rgb);
+    end = Clock::now();
+    auto sharpen_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Sharpen:  " << sharpen_time << " us\n";
 
+    auto total_end = Clock::now();
+    auto total_time = std::chrono::duration_cast<std::chrono::microseconds>(total_end - total_start).count();
+    std::cout << "-------------------------\n";
+    std::cout << "Total:    " << total_time << " us\n\n";
+
+    // Save
     std::cout << "Saving output...\n";
     isp::save_ppm("data/output.ppm", rgb);
     isp::save_png("data/output.png", rgb);

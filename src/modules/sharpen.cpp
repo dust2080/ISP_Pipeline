@@ -1,5 +1,6 @@
 #include "modules/sharpen.hpp"
 #include <algorithm>
+#include <omp.h>
 
 namespace isp {
 
@@ -23,6 +24,7 @@ void apply_sharpen(RgbImage& img) {
     //   0  -1   0
     //  -1   5  -1
     //   0  -1   0
+    #pragma omp parallel for schedule(dynamic)
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             const Pixel& center = get(x, y);

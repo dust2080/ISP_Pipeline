@@ -1,4 +1,5 @@
 #include "modules/demosaic.hpp"
+#include <omp.h>
 
 namespace isp {
 
@@ -22,6 +23,7 @@ RgbImage demosaic(const Image& raw) {
     const int h = raw.height();
     RgbImage rgb(w, h, raw.bit_depth());
 
+    #pragma omp parallel for schedule(dynamic) 
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             bool even_row = (y % 2 == 0);

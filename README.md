@@ -30,7 +30,9 @@ RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 ## Performance Benchmark
 
 Test image: 1206 x 2144 (2.5 MP)  
-Platform: MacBook Air M4
+Platform: MacBook Air M4 (10 cores)
+
+### Before Optimization (Single-threaded)
 
 | Module | Time | Percentage |
 |--------|------|------------|
@@ -40,6 +42,17 @@ Platform: MacBook Air M4
 | Gamma | 27 ms | 3% |
 | Sharpen | 332 ms | 36% |
 | **Total** | **932 ms** | 100% |
+
+### After Optimization (OpenMP Multi-threading)
+
+| Module | Time | Speedup |
+|--------|------|---------|
+| BLC | 16 ms | 2x |
+| Demosaic | 99 ms | **4.7x** |
+| AWB | 80 ms | - |
+| Gamma | 27 ms | - |
+| Sharpen | 68 ms | **5x** |
+| **Total** | **291 ms** | **3.2x** |
 
 ## Memory Usage
 
@@ -59,16 +72,10 @@ Sharpen currently copies the entire image. This can be optimized to keep only 3 
 
 ### Analysis
 
-- **Demosaic** and **Sharpen** dominate the pipeline (86% of total time)
-- Both require neighbor pixel access, causing more cache misses
+- **Demosaic** and **Sharpen** benefit most from parallelization (4.7x and 5x speedup)
+- Both modules process each pixel independently, making them ideal for parallel execution
 - **Gamma** is fast due to LUT optimization
-
-### Potential Optimizations
-
-- Multi-threading with OpenMP (expected 3-4x speedup)
-- SIMD instructions (AVX2) for parallel pixel processing
-- Cache-friendly tiling to improve memory access patterns
-- Reduce memory copy in Sharpen module
+- Overall pipeline achieves **3.2x speedup** with OpenMP
 
 ## Project Structure
 ```
@@ -108,6 +115,13 @@ ISP_Pipeline/
 ### Requirements
 - C++20 compiler (GCC 10+, Clang 12+, MSVC 2019+)
 - CMake 3.20+
+- OpenMP (for multi-threading optimization)
+
+### macOS
+```bash
+# Install OpenMP via Homebrew
+brew install libomp
+```
 
 ### Steps
 ```bash
@@ -150,7 +164,7 @@ Computing `pow()` for every pixel is expensive. A Lookup Table (LUT) pre-compute
 - [ ] Add noise reduction module
 - [ ] Implement edge-directed demosaicing
 - [ ] Support real RAW formats (DNG) via libraw
-- [ ] Add performance benchmarks
+- [x] ~~Multi-threading with OpenMP~~ ✅ Implemented (3.2x speedup)
 
 ## License
 
