@@ -8,7 +8,7 @@ This project simulates the core image processing steps that happen inside a came
 
 ## Pipeline
 ```
-RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
+RAW → BLC → Demosaic → AWB → Gamma → Denoise → Sharpen → RGB Output
 ```
 
 ## Modules
@@ -19,6 +19,7 @@ RAW → BLC → Demosaic → AWB → Gamma → Sharpen → RGB Output
 | **Demosaic** | Bayer to RGB conversion | Bilinear interpolation |
 | **AWB** | Auto White Balance | Gray World algorithm |
 | **Gamma** | Gamma correction | LUT-based, γ=2.2 |
+| **Denoise** | Noise reduction | Bilateral Filter |
 | **Sharpen** | Edge enhancement | 3x3 convolution kernel |
 
 ## Results
@@ -51,8 +52,9 @@ Platform: MacBook Air M4 (10 cores)
 | Demosaic | 99 ms | **4.7x** |
 | AWB | 80 ms | - |
 | Gamma | 27 ms | - |
+| Denoise | 1968 ms | - |
 | Sharpen | 68 ms | **5x** |
-| **Total** | **291 ms** | **3.2x** |
+| **Total** | **2261 ms** | - |
 
 ## Memory Usage
 
@@ -91,6 +93,7 @@ ISP_Pipeline/
 │       ├── demosaic.hpp
 │       ├── awb.hpp
 │       ├── gamma.hpp
+│       ├── denoise.hpp
 │       └── sharpen.hpp
 ├── src/
 │   ├── main.cpp
@@ -99,10 +102,11 @@ ISP_Pipeline/
 │   ├── io.cpp
 │   └── modules/
 │       ├── blc.cpp
-│       ├── demosaic.cpp
+│       ├── demosaic.cpp   # OpenMP parallelized
 │       ├── awb.cpp
 │       ├── gamma.cpp
-│       └── sharpen.cpp
+│       ├── denoise.cpp    # OpenMP parallelized, Bilateral Filter
+│       └── sharpen.cpp    # OpenMP parallelized
 ├── tools/
 │   └── generate_test_raw.cpp
 └── vendor/
@@ -158,6 +162,9 @@ Gray World assumes the average color of a scene is neutral gray. It's simple and
 ### Why LUT for Gamma?
 Computing `pow()` for every pixel is expensive. A Lookup Table (LUT) pre-computes all 4096 possible values (for 12-bit), reducing gamma correction to simple array lookups.
 
+### Why Bilateral Filter for Denoise?
+Bilateral Filter is an edge-preserving smoothing algorithm. Unlike Gaussian blur which blurs everything equally, Bilateral Filter considers both spatial distance and color similarity. Pixels with similar colors get higher weights, while pixels with different colors (likely edges) get lower weights. This preserves edges while reducing noise in flat areas.
+
 ## Future Improvements
 
 - [ ] Support more Bayer patterns (BGGR, GRBG, GBRG)
@@ -165,6 +172,7 @@ Computing `pow()` for every pixel is expensive. A Lookup Table (LUT) pre-compute
 - [ ] Implement edge-directed demosaicing
 - [ ] Support real RAW formats (DNG) via libraw
 - [x] ~~Multi-threading with OpenMP~~ ✅ Implemented (3.2x speedup)
+- [ ] Optimize Bilateral Filter (separable approximation or GPU acceleration)
 
 ## License
 
