@@ -56,6 +56,15 @@ Platform: MacBook Air M4 (10 cores)
 | Sharpen | 68 ms | **5x** |
 | **Total** | **2261 ms** | - |
 
+### GPU Acceleration (CUDA)
+
+| Platform | Denoise Time | Speedup |
+|----------|--------------|---------|
+| CPU (single-threaded) | ~20,000 ms | 1x |
+| GPU (Tesla T4) | ~10 ms | **1930x** |
+
+See [cuda/](cuda/) for the CUDA implementation.
+
 ## Memory Usage
 
 Test image: 1206 x 2144 (2.5 MP)
@@ -172,7 +181,7 @@ Bilateral Filter is an edge-preserving smoothing algorithm. Unlike Gaussian blur
 - [ ] Implement edge-directed demosaicing
 - [ ] Support real RAW formats (DNG) via libraw
 - [x] ~~Multi-threading with OpenMP~~ ✅ Implemented (3.2x speedup)
-- [ ] Optimize Bilateral Filter (separable approximation or GPU acceleration)
+- [x] ~~GPU acceleration with CUDA~~ ✅ Implemented (1930x speedup)
 
 ## License
 
