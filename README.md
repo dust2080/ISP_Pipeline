@@ -33,7 +33,7 @@ RAW → BLC → Demosaic → AWB → Gamma → Denoise → Sharpen → RGB Outpu
 Test image: 1206 x 2144 (2.5 MP)  
 Platform: MacBook Air M4 (10 cores)
 
-### Before Optimization (Single-threaded)
+### Before Optimization (Single-threaded, without Denoise)
 
 | Module | Time | Percentage |
 |--------|------|------------|
@@ -55,6 +55,8 @@ Platform: MacBook Air M4 (10 cores)
 | Denoise | 1968 ms | - |
 | Sharpen | 68 ms | **5x** |
 | **Total** | **2261 ms** | - |
+
+*Note: Total time increased due to adding Denoise module (1968 ms). Without Denoise, the optimized pipeline runs in ~290 ms (3.2x faster than original 932 ms).*
 
 ### GPU Acceleration (CUDA)
 
@@ -93,6 +95,9 @@ Sharpen currently copies the entire image. This can be optimized to keep only 3 
 ISP_Pipeline/
 ├── CMakeLists.txt
 ├── README.md
+├── cuda/
+│   ├── bilateral_cuda.cu  # CUDA implementation
+│   └── README.md
 ├── include/
 │   ├── image.hpp          # RAW image container
 │   ├── rgb_image.hpp      # RGB image container
@@ -177,7 +182,7 @@ Bilateral Filter is an edge-preserving smoothing algorithm. Unlike Gaussian blur
 ## Future Improvements
 
 - [ ] Support more Bayer patterns (BGGR, GRBG, GBRG)
-- [ ] Add noise reduction module
+- [x] ~~Add noise reduction module~~ ✅ Implemented (Bilateral Filter)
 - [ ] Implement edge-directed demosaicing
 - [ ] Support real RAW formats (DNG) via libraw
 - [x] ~~Multi-threading with OpenMP~~ ✅ Implemented (3.2x speedup)
