@@ -18,3 +18,8 @@ data/*.png
 *.a
 *.dylib
 EOF
+
+# Network test files
+network/frame_receiver
+network/frame_*.raw
+network/output_*.png

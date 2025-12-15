@@ -4,7 +4,7 @@ A simple Image Signal Processor (ISP) pipeline simulator written in Modern C++ (
 
 ## Overview
 
-This project simulates the core image processing steps that happen inside a camera's ISP, converting RAW sensor data into a viewable RGB image.
+This project simulates the core image processing steps that happen inside a camera's ISP, converting RAW sensor data into a viewable RGB image. Features network integration for receiving RAW frames from a Linux camera driver.
 
 ## Pipeline
 ```
@@ -21,6 +21,37 @@ RAW → BLC → Demosaic → AWB → Gamma → Denoise → Sharpen → RGB Outpu
 | **Gamma** | Gamma correction | LUT-based, γ=2.2 |
 | **Denoise** | Noise reduction | Bilateral Filter |
 | **Sharpen** | Edge enhancement | 3x3 convolution kernel |
+
+## Network Integration
+
+Receives camera frames from Linux driver via TCP for remote processing.
+
+### Quick Start
+```bash
+cd network
+make
+./frame_receiver  # Server must be running on 192.168.64.2:8080
+```
+
+Automatically receives 5 frames, processes through ISP, and saves as `output_001.png` ~ `output_005.png`.
+
+### Architecture
+```
+Linux Driver (VM)  ───TCP───→  ISP Pipeline (macOS)
+/dev/camera                    frame_receiver
+640×480 RAW12                  ↓ 7-stage ISP
+                               output_*.png
+```
+
+**For complete setup instructions, see:**  
+[linux-driver-learning Module 07](https://github.com/dust2080/linux-driver-learning/tree/main/07-network-streaming)
+
+### Integration Details
+
+- **Protocol:** TCP (port 8080)
+- **Frame format:** 640×480 RAW12 (614,400 bytes/frame)
+- **Processing:** Automatic ISP pipeline invocation
+- **Output:** PNG with BLC → Demosaic → AWB → Gamma → Denoise → Sharpen applied
 
 ## Results
 
@@ -121,6 +152,9 @@ ISP_Pipeline/
 │       ├── gamma.cpp
 │       ├── denoise.cpp    # OpenMP parallelized, Bilateral Filter
 │       └── sharpen.cpp    # OpenMP parallelized
+├── network/
+│   ├── frame_receiver.cpp # TCP client for driver integration
+│   └── Makefile
 ├── tools/
 │   └── generate_test_raw.cpp
 └── vendor/
@@ -163,6 +197,11 @@ make
 ./build/isp_main path/to/image.png
 ```
 
+### Using RAW input
+```bash
+./build/isp_main path/to/image.raw
+```
+
 Output will be saved to `data/output.png`.
 
 ## Technical Details
@@ -179,6 +218,10 @@ Computing `pow()` for every pixel is expensive. A Lookup Table (LUT) pre-compute
 ### Why Bilateral Filter for Denoise?
 Bilateral Filter is an edge-preserving smoothing algorithm. Unlike Gaussian blur which blurs everything equally, Bilateral Filter considers both spatial distance and color similarity. Pixels with similar colors get higher weights, while pixels with different colors (likely edges) get lower weights. This preserves edges while reducing noise in flat areas.
 
+## Related Projects
+
+- [linux-driver-learning](https://github.com/dust2080/linux-driver-learning) - Linux kernel driver development, Module 07 integrates with this ISP Pipeline
+
 ## Future Improvements
 
 - [ ] Support more Bayer patterns (BGGR, GRBG, GBRG)
@@ -187,6 +230,7 @@ Bilateral Filter is an edge-preserving smoothing algorithm. Unlike Gaussian blur
 - [ ] Support real RAW formats (DNG) via libraw
 - [x] ~~Multi-threading with OpenMP~~ ✅ Implemented (3.2x speedup)
 - [x] ~~GPU acceleration with CUDA~~ ✅ Implemented (1930x speedup)
+- [x] ~~Network integration with Linux driver~~ ✅ Implemented (TCP streaming)
 
 ## License
 
